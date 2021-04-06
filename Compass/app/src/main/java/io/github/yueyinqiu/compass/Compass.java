@@ -1,7 +1,3 @@
-/**
- * Copied with modifications from
- * https://github.com/iutinvg/compass/tree/master/app/src/main/java/com/sevencrayons/compass
- */
 package io.github.yueyinqiu.compass;
 
 import android.content.Context;
@@ -12,103 +8,110 @@ import android.hardware.SensorManager;
 
 public class Compass implements SensorEventListener
 {
-    public interface CompassListener {
-        void onNewAzimuth(float azimuth);
+    public interface CompassListener
+    {
+        void onNewAzimuth(double azimuth);
+        void onGravityAccuracyChanged(int accuracy);
+        void onMagnetismAccuracyChanged(int accuracy);
     }
 
     private CompassListener listener;
 
-    private SensorManager sensorManager;
-    private Sensor gsensor;
-    private Sensor msensor;
+    private final SensorManager sensorManager;
+    private final Sensor gravitySensor;
+    private final Sensor magnetismSensor;
 
-    private float[] mGravity = new float[3];
-    private float[] mGeomagnetic = new float[3];
-    private float[] R = new float[9];
-    private float[] I = new float[9];
-
-    private float azimuth;
-    private float azimuthFix;
-
-    public Compass(Context context) {
-        sensorManager = (SensorManager) context
-                .getSystemService(Context.SENSOR_SERVICE);
-        gsensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        msensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+    public Compass(Context context) throws NoSuchSensorException
+    {
+        sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetismSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        if (gravitySensor == null || magnetismSensor == null)
+        {
+            throw new NoSuchSensorException();
+        }
     }
 
-    public void start() {
-        sensorManager.registerListener(this, gsensor,
+    public void start()
+    {
+        sensorManager.registerListener(
+                this, gravitySensor,
                 SensorManager.SENSOR_DELAY_GAME);
-        sensorManager.registerListener(this, msensor,
+        sensorManager.registerListener(
+                this, magnetismSensor,
                 SensorManager.SENSOR_DELAY_GAME);
     }
 
-    public void stop() {
+    public void stop()
+    {
         sensorManager.unregisterListener(this);
     }
 
-    public void setAzimuthFix(float fix) {
-        azimuthFix = fix;
-    }
-
-    public void resetAzimuthFix() {
-        setAzimuthFix(0);
-    }
-
-    public void setListener(CompassListener l) {
+    public void setListener(CompassListener l)
+    {
         listener = l;
     }
 
+    private final float[] mGravity = new float[3];
+    private final float[] mGeomagnetic = new float[3];
+
     @Override
-    public void onSensorChanged(SensorEvent event) {
+    public void onSensorChanged(SensorEvent event)
+    {
+        if (listener == null)
+            return;
+
         final float alpha = 0.97f;
 
-        synchronized (this) {
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-
+        switch (event.sensor.getType())
+        {
+            case Sensor.TYPE_ACCELEROMETER:
                 mGravity[0] = alpha * mGravity[0] + (1 - alpha)
                         * event.values[0];
                 mGravity[1] = alpha * mGravity[1] + (1 - alpha)
                         * event.values[1];
                 mGravity[2] = alpha * mGravity[2] + (1 - alpha)
                         * event.values[2];
-
-                // mGravity = event.values;
-
-                // Log.e(TAG, Float.toString(mGravity[0]));
-            }
-
-            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-                // mGeomagnetic = event.values;
-
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
                 mGeomagnetic[0] = alpha * mGeomagnetic[0] + (1 - alpha)
                         * event.values[0];
                 mGeomagnetic[1] = alpha * mGeomagnetic[1] + (1 - alpha)
                         * event.values[1];
                 mGeomagnetic[2] = alpha * mGeomagnetic[2] + (1 - alpha)
                         * event.values[2];
-                // Log.e(TAG, Float.toString(event.values[0]));
+                break;
+            default:
+                return;
+        }
 
-            }
-
-            boolean success = SensorManager.getRotationMatrix(R, I, mGravity,
-                    mGeomagnetic);
-            if (success) {
-                float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
-                // Log.d(TAG, "azimuth (rad): " + azimuth);
-                azimuth = (float) Math.toDegrees(orientation[0]); // orientation
-                azimuth = (azimuth + azimuthFix + 360) % 360;
-                // Log.d(TAG, "azimuth (deg): " + azimuth);
-                if (listener != null) {
-                    listener.onNewAzimuth(azimuth);
-                }
-            }
+        float[] r = new float[9];
+        float[] i = new float[9];
+        boolean success = SensorManager.getRotationMatrix(
+                r, i, mGravity, mGeomagnetic);
+        if (success)
+        {
+            float[] orientation = new float[3];
+            SensorManager.getOrientation(r, orientation);
+            double azimuth = Math.toDegrees(orientation[0]);
+            azimuth = (azimuth + 360) % 360;
+            listener.onNewAzimuth(azimuth);
         }
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    public void onAccuracyChanged(Sensor sensor, int accuracy)
+    {
+        if(listener == null)
+            return;
+        switch (sensor.getType())
+        {
+            case Sensor.TYPE_ACCELEROMETER:
+                listener.onGravityAccuracyChanged(accuracy);
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                listener.onMagnetismAccuracyChanged(accuracy);
+                break;
+        }
     }
 }
