@@ -240,8 +240,8 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
     {
         titleComponents = new TitleComponents();
         titleComponents.title = "Compass";
-        titleComponents.gravityAccuracy = 3;
-        titleComponents.magnetismAccuracy = 3;
+        titleComponents.gravityAccuracy = -1;
+        titleComponents.magnetismAccuracy = -1;
         refreshTitle();
         return true;
     }

@@ -55,6 +55,9 @@ public class Compass implements SensorEventListener
     private final float[] mGravity = new float[3];
     private final float[] mGeomagnetic = new float[3];
 
+    private int gravityAccuracy = -1;
+    private int magnetismAccuracy = -1;
+
     @Override
     public void onSensorChanged(SensorEvent event)
     {
@@ -66,6 +69,11 @@ public class Compass implements SensorEventListener
         switch (event.sensor.getType())
         {
             case Sensor.TYPE_ACCELEROMETER:
+                if(event.accuracy != gravityAccuracy)
+                {
+                    gravityAccuracy = event.accuracy;
+                    listener.onGravityAccuracyChanged(gravityAccuracy);
+                }
                 mGravity[0] = alpha * mGravity[0] + (1 - alpha)
                         * event.values[0];
                 mGravity[1] = alpha * mGravity[1] + (1 - alpha)
@@ -74,6 +82,11 @@ public class Compass implements SensorEventListener
                         * event.values[2];
                 break;
             case Sensor.TYPE_MAGNETIC_FIELD:
+                if(event.accuracy != magnetismAccuracy)
+                {
+                    magnetismAccuracy = event.accuracy;
+                    listener.onMagnetismAccuracyChanged(magnetismAccuracy);
+                }
                 mGeomagnetic[0] = alpha * mGeomagnetic[0] + (1 - alpha)
                         * event.values[0];
                 mGeomagnetic[1] = alpha * mGeomagnetic[1] + (1 - alpha)
@@ -102,16 +115,5 @@ public class Compass implements SensorEventListener
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy)
     {
-        if(listener == null)
-            return;
-        switch (sensor.getType())
-        {
-            case Sensor.TYPE_ACCELEROMETER:
-                listener.onGravityAccuracyChanged(accuracy);
-                break;
-            case Sensor.TYPE_MAGNETIC_FIELD:
-                listener.onMagnetismAccuracyChanged(accuracy);
-                break;
-        }
     }
 }
