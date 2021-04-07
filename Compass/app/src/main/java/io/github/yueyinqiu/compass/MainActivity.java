@@ -39,33 +39,62 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-    //region setting up
+    //region image
     private boolean setupImage()
     {
-        String uriForImage;
+        String imageUri;
         try (FileInputStream inputStream = openFileInput("imagePath"))
         {
             InputStreamReader reader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(reader);
 
-            uriForImage = bufferedReader.readLine();
+            imageUri = bufferedReader.readLine();
         }
         catch (FileNotFoundException ignore)
         {
-            uriForImage = null;
+            imageUri = null;
         }
         catch (IOException e)
         {
             MakeToast("44162282: Cannot read settings files.");
             return false;
         }
-        if(uriForImage == null)
+        if(imageUri == null)
             arrowView.setImageResource(R.mipmap.ic_launcher);
         else
         {
-            Uri uri = Uri.parse(uriForImage);
+            Uri uri = Uri.parse(imageUri);
             arrowView.setImageURI(uri);
         }
+        return true;
+    }
+
+    LQRPhotoSelectUtils mLqrPhotoSelectUtils;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        mLqrPhotoSelectUtils.attachToActivityForResult(requestCode, resultCode, data);
+    }
+
+    private boolean setupPhotoSelectUtils()
+    {
+        this.mLqrPhotoSelectUtils = new LQRPhotoSelectUtils(
+                this, (outputFile, outputUri) -> {
+            arrowView.setImageURI(outputUri);
+            try (FileOutputStream outputStream = openFileOutput(
+                    "imagePath", Context.MODE_PRIVATE))
+            {
+                OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+                BufferedWriter bufferedWriter = new BufferedWriter(writer);
+                bufferedWriter.write(outputUri.toString());
+                bufferedWriter.flush();
+            }
+            catch (IOException e)
+            {
+                MakeToast("ecf11c80: Cannot write settings files.");
+            }
+        }, false);
         return true;
     }
     //endregion
@@ -77,7 +106,10 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
         setContentView(R.layout.activity_main);
         arrowView = findViewById(R.id.imageView);
 
-        if(!(setupTitleComponent() && setupImage() && setupCompass() &&  setupPhotoSelectUtils()))
+        if (!setupTitleComponent() ||
+                !setupImage() ||
+                !setupCompass() ||
+                !setupPhotoSelectUtils())
             this.finish();
     }
 
@@ -89,7 +121,6 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
         return true;
     }
 
-    // 菜单的监听方法
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
@@ -113,36 +144,6 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
                 requestPermissions(t, 233);
             mLqrPhotoSelectUtils.selectPhoto();
         }
-        return true;
-    }
-    //endregion
-
-    //region photo select util
-    LQRPhotoSelectUtils mLqrPhotoSelectUtils;
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-        mLqrPhotoSelectUtils.attachToActivityForResult(requestCode, resultCode, data);
-    }
-
-    private boolean setupPhotoSelectUtils()
-    {
-        this.mLqrPhotoSelectUtils = new LQRPhotoSelectUtils(
-                this, (outputFile, outputUri) -> {
-            arrowView.setImageURI(outputUri);
-            try (FileOutputStream outputStream = openFileOutput("imagePath", Context.MODE_PRIVATE))
-            {
-                OutputStreamWriter writer = new OutputStreamWriter(outputStream);
-                BufferedWriter bufferedWriter = new BufferedWriter(writer);
-                bufferedWriter.write(outputUri.toString());
-                bufferedWriter.flush();
-            }
-            catch (IOException e)
-            {
-                MakeToast("ecf11c80: Cannot write settings files.");
-            }
-        }, false);
         return true;
     }
     //endregion

@@ -1,7 +1,5 @@
 package io.github.yueyinqiu.compass;
 
-import android.graphics.Color;
-
 public class TitleComponents
 {
     public String title;
