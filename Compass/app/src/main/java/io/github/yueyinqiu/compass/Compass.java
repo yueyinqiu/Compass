@@ -11,22 +11,22 @@ public class Compass implements SensorEventListener
     public interface CompassListener
     {
         void onNewAzimuth(double azimuth);
-        void onGravityAccuracyChanged(int accuracy);
+        void onAccelerationAccuracyChanged(int accuracy);
         void onMagnetismAccuracyChanged(int accuracy);
     }
 
     private CompassListener listener;
 
     private final SensorManager sensorManager;
-    private final Sensor gravitySensor;
+    private final Sensor accelerometer;
     private final Sensor magnetismSensor;
 
     public Compass(Context context) throws NoSuchSensorException
     {
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetismSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        if (gravitySensor == null || magnetismSensor == null)
+        if (accelerometer == null || magnetismSensor == null)
         {
             throw new NoSuchSensorException();
         }
@@ -35,7 +35,7 @@ public class Compass implements SensorEventListener
     public void start()
     {
         sensorManager.registerListener(
-                this, gravitySensor,
+                this, accelerometer,
                 SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(
                 this, magnetismSensor,
@@ -52,10 +52,10 @@ public class Compass implements SensorEventListener
         listener = l;
     }
 
-    private final float[] mGravity = new float[3];
-    private final float[] mGeomagnetic = new float[3];
+    private final float[] acceleration = new float[3];
+    private final float[] magnetism = new float[3];
 
-    private int gravityAccuracy = -1;
+    private int accelerationAccuracy = -1;
     private int magnetismAccuracy = -1;
 
     @Override
@@ -69,16 +69,16 @@ public class Compass implements SensorEventListener
         switch (event.sensor.getType())
         {
             case Sensor.TYPE_ACCELEROMETER:
-                if(event.accuracy != gravityAccuracy)
+                if(event.accuracy != accelerationAccuracy)
                 {
-                    gravityAccuracy = event.accuracy;
-                    listener.onGravityAccuracyChanged(gravityAccuracy);
+                    accelerationAccuracy = event.accuracy;
+                    listener.onAccelerationAccuracyChanged(accelerationAccuracy);
                 }
-                mGravity[0] = alpha * mGravity[0] + (1 - alpha)
+                acceleration[0] = alpha * acceleration[0] + (1 - alpha)
                         * event.values[0];
-                mGravity[1] = alpha * mGravity[1] + (1 - alpha)
+                acceleration[1] = alpha * acceleration[1] + (1 - alpha)
                         * event.values[1];
-                mGravity[2] = alpha * mGravity[2] + (1 - alpha)
+                acceleration[2] = alpha * acceleration[2] + (1 - alpha)
                         * event.values[2];
                 break;
             case Sensor.TYPE_MAGNETIC_FIELD:
@@ -87,11 +87,11 @@ public class Compass implements SensorEventListener
                     magnetismAccuracy = event.accuracy;
                     listener.onMagnetismAccuracyChanged(magnetismAccuracy);
                 }
-                mGeomagnetic[0] = alpha * mGeomagnetic[0] + (1 - alpha)
+                magnetism[0] = alpha * magnetism[0] + (1 - alpha)
                         * event.values[0];
-                mGeomagnetic[1] = alpha * mGeomagnetic[1] + (1 - alpha)
+                magnetism[1] = alpha * magnetism[1] + (1 - alpha)
                         * event.values[1];
-                mGeomagnetic[2] = alpha * mGeomagnetic[2] + (1 - alpha)
+                magnetism[2] = alpha * magnetism[2] + (1 - alpha)
                         * event.values[2];
                 break;
             default:
@@ -101,7 +101,7 @@ public class Compass implements SensorEventListener
         float[] r = new float[9];
         float[] i = new float[9];
         boolean success = SensorManager.getRotationMatrix(
-                r, i, mGravity, mGeomagnetic);
+                r, i, acceleration, magnetism);
         if (success)
         {
             float[] orientation = new float[3];

@@ -209,9 +209,9 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
     }
 
     @Override
-    public void onGravityAccuracyChanged(int accuracy)
+    public void onAccelerationAccuracyChanged(int accuracy)
     {
-        titleComponents.gravityAccuracy = accuracy;
+        titleComponents.accelerationAccuracy = accuracy;
         refreshTitle();
     }
 
@@ -227,21 +227,22 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
     TitleComponents titleComponents;
     private void refreshTitle()
     {
-        ActionBar actionBar = this.getSupportActionBar();
         StringBuilder builder = new StringBuilder();
         builder.append(titleComponents.title);
         builder.append(" - G");
-        builder.append(titleComponents.gravityAccuracy + 1);
+        builder.append(titleComponents.accelerationAccuracy + 1);
         builder.append("/4 M");
         builder.append(titleComponents.magnetismAccuracy + 1);
         builder.append("/4");
+        ActionBar actionBar = this.getSupportActionBar();
+        assert actionBar != null;
         actionBar.setTitle(builder);
     }
     private boolean setupTitleComponent()
     {
         titleComponents = new TitleComponents();
         titleComponents.title = "Compass";
-        titleComponents.gravityAccuracy = -1;
+        titleComponents.accelerationAccuracy = -1;
         titleComponents.magnetismAccuracy = -1;
         refreshTitle();
         return true;
