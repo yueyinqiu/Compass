@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
             return false;
         }
         if(imageUri == null)
-            arrowView.setImageResource(R.mipmap.ic_launcher);
+            arrowView.setImageResource(R.mipmap.skin_default);
         else
         {
             Uri uri = Uri.parse(imageUri);
