@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Compass</string>
+    <string name="select_skin">select skin</string>
+    <string name="view_repository">view repository</string>
 </resources>
