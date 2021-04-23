@@ -22,7 +22,7 @@ Compass 是一个简约的指南针应用。 Compass is a simple compass app.
 
 当此应用显示在最上层时，屏幕将保持常亮；当应用不在最上层时，将暂停相关传感器的使用以省电。 When this app is on top, the screen will be kept on; If it's not on top, the use of the related sensors will be suspended to save power.
 
-### 可锁定 Lockable
+### 锁定指南针 Locking The Compass
 
 通过点击界面以锁定指南针。 Click the interface to lock the compass.
 
