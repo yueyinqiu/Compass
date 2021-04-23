@@ -6,17 +6,27 @@ Compass 是一个简约的指南针应用。 Compass is a simple compass app.
 
 ## 功能和特性 Features
 
-### 自定义皮肤 Custom Skins
+### 自定义皮肤 Customizing Skins
 
 用户可以任意选择手机内的图片作为皮肤，从而自由地更换罗盘类型。 Users can select any picture in their mobile phone as the skin, so that they can freely change the type of the luopan.
 
 我们会[在此](https://github.com/yueyinqiu/Compass-Skins)上传常用的皮肤，如果您有自制的皮肤，欢迎您在 Issues 中进行分享，我们会将其加入（[若因为某些原因无法访问，可点此](#仓库镜像-repository-mirrors)）。 We will upload some frequently-used skins [here](https://github.com/yueyinqiu/Compass-Skins). If you can share your self-made skins in Issues, we will appreciate it and put them into the repository \([click here if cannot access it for some reason](#仓库镜像-repository-mirrors)\).
 
-### 传感器精度显示 Sensor Accuracy Display
+### 显示传感器精度 Displaying Sensor Accuracy
 
 传感器精度会被显示在标题栏中。其中 `G` 表示加速度传感器的精度，而 `M` 表示磁场传感器的精度。 The accuracies of the sensors are shown in the title bar where `G` represents the accelerometer and `M` represents the magnetic field sensor.
 
 我们建议在使用时保持所有的精度都达到 `4/4` 。 We suggest keeping all the accuracies `4/4` when using it.
+
+### 保持屏幕常亮 Keeping Screen On
+
+当此应用显示在最上层时，屏幕将保持常亮；当应用不在最上层时，将暂停相关传感器的使用以省电。 When this app is on top, the screen will be kept on; If it's not on top, the use of the related sensors will be suspended to save power.
+
+### 可锁定 Lockable
+
+通过点击界面以锁定指南针。 Click the interface to lock the compass.
+
+锁定状态下将暂停相关传感器的使用以省电。 If it's locked, the use of the related sensors will be suspended to save power.
 
 ## 下载 Downloading
 
