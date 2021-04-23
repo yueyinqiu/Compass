@@ -27,24 +27,31 @@ public class Compass implements SensorEventListener
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetismSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         if (accelerometer == null || magnetismSensor == null)
-        {
             throw new NoSuchSensorException();
-        }
+        isRunning = false;
     }
+
+    private boolean isRunning;
 
     public void start()
     {
+        if(isRunning)
+            return;
         sensorManager.registerListener(
                 this, accelerometer,
                 SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(
                 this, magnetismSensor,
                 SensorManager.SENSOR_DELAY_GAME);
+        isRunning = true;
     }
 
     public void stop()
     {
+        if(!isRunning)
+            return;
         sensorManager.unregisterListener(this);
+        isRunning = false;
     }
 
     public void setListener(CompassListener l)

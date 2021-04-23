@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
@@ -108,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
 
         if (!setupTitleComponent() ||
                 !setupImage() ||
+                !setupImageLocking() ||
                 !setupCompass() ||
                 !setupPhotoSelectUtils())
             this.finish();
@@ -168,28 +170,32 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
     protected void onStart()
     {
         super.onStart();
-        compass.start();
+        if (!imageLocked)
+            compass.start();
     }
 
     @Override
     protected void onPause()
     {
         super.onPause();
-        compass.stop();
+        if (!imageLocked)
+            compass.stop();
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
-        compass.start();
+        if (!imageLocked)
+            compass.start();
     }
 
     @Override
     protected void onStop()
     {
         super.onStop();
-        compass.stop();
+        if (!imageLocked)
+            compass.stop();
     }
 
     @Override
@@ -229,11 +235,18 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
     {
         StringBuilder builder = new StringBuilder();
         builder.append(titleComponents.title);
-        builder.append(" - G");
-        builder.append(titleComponents.accelerationAccuracy + 1);
-        builder.append("/4 M");
-        builder.append(titleComponents.magnetismAccuracy + 1);
-        builder.append("/4");
+        if(titleComponents.imageLocked)
+        {
+            builder.append(" - Locked");
+        }
+        else
+        {
+            builder.append(" - G");
+            builder.append(titleComponents.accelerationAccuracy + 1);
+            builder.append("/4 M");
+            builder.append(titleComponents.magnetismAccuracy + 1);
+            builder.append("/4");
+        }
         ActionBar actionBar = this.getSupportActionBar();
         assert actionBar != null;
         actionBar.setTitle(builder);
@@ -241,11 +254,32 @@ public class MainActivity extends AppCompatActivity implements Compass.CompassLi
     private boolean setupTitleComponent()
     {
         titleComponents = new TitleComponents();
-        titleComponents.title = "Compass";
+        titleComponents.title = getString(R.string.app_name);
         titleComponents.accelerationAccuracy = -1;
         titleComponents.magnetismAccuracy = -1;
+        titleComponents.imageLocked = false;
         refreshTitle();
         return true;
+    }
+    //endregion
+
+    //region lock
+    private boolean imageLocked;
+    private boolean setupImageLocking()
+    {
+        imageLocked = false;
+        return true;
+    }
+    public void triggerLocking(View view)
+    {
+        imageLocked = !imageLocked;
+        if(imageLocked)
+            compass.stop();
+        else
+            compass.start();
+
+        titleComponents.imageLocked = imageLocked;
+        refreshTitle();
     }
     //endregion
 }
